@@ -3,8 +3,10 @@ package common
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -36,6 +38,20 @@ func IsInitialValue(v interface{}) bool {
 	return isInitialValue(reflect.ValueOf(v))
 }
 
+func resolveEnvDefaults(s string) string {
+	if !strings.HasPrefix(s, "$") {
+		return s
+	}
+	if i := strings.Index(s, "|"); i != -1 {
+		if v := os.Getenv(s[1:i]); len(v) > 0 {
+			return v
+		} else {
+			s = s[i+1:]
+		}
+	}
+	return s
+}
+
 // SetDefaults initializes members in a struct referenced by a pointer.
 // Maps and slices are initialized by `make` and other primitive types are set with default values.
 // `ptr` should be a struct pointer
@@ -53,7 +69,7 @@ func SetDefaults(ptr interface{}) error {
 
 	for i := 0; i < t.NumField(); i++ {
 		if defaultVal := t.Field(i).Tag.Get(defaultsTagName); defaultVal != "-" {
-			if err := setFieldDefaults(v.Field(i), defaultVal); err != nil {
+			if err := setFieldDefaults(v.Field(i), resolveEnvDefaults(defaultVal)); err != nil {
 				return err
 			}
 		}

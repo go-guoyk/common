@@ -1,6 +1,7 @@
 package common
 
 import (
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -29,6 +30,9 @@ type (
 )
 
 type Sample struct {
+	EnvExisted    int `default:"$ENV_EXISTED|1"`
+	EnvNotExisted int `default:"$ENV_NOT_EXISTED|1"`
+
 	Int       int           `default:"1"`
 	Int8      int8          `default:"8"`
 	Int16     int16         `default:"16"`
@@ -110,6 +114,8 @@ type Emmbeded struct {
 }
 
 func TestInit(t *testing.T) {
+	_ = os.Setenv("ENV_EXISTED", "2")
+
 	sample := &Sample{
 		NonInitialString:            "string",
 		NonInitialSlice:             []int{1, 2, 3},
@@ -359,6 +365,15 @@ func TestInit(t *testing.T) {
 		}
 		if sample.NoDefaultStruct.WithDefault != "" {
 			t.Errorf("it should not initialize a struct with default values")
+		}
+	})
+
+	t.Run("env", func(t *testing.T) {
+		if sample.EnvExisted != 2 {
+			t.Errorf("it should be set to 2")
+		}
+		if sample.EnvNotExisted != 1 {
+			t.Errorf("it should be set to 1")
 		}
 	})
 }
