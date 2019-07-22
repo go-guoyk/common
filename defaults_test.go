@@ -1,12 +1,11 @@
 package common
 
 import (
+	"go.guoyk.net/common/testdata"
 	"os"
 	"reflect"
 	"testing"
 	"time"
-
-	"go.guoyk.net/common/internal/defaultsfixture"
 )
 
 type (
@@ -137,7 +136,7 @@ func TestInit(t *testing.T) {
 		t.Fatalf("it should return an error when used for a non-pointer type")
 	}
 
-	SetDefaults(&defaultsfixture.Sample{}) // should not panic
+	_ = SetDefaults(&testdata.DefaultsSample{}) // should not panic
 
 	t.Run("scalar types", func(t *testing.T) {
 		if sample.Int != 1 {

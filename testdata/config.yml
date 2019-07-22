@@ -1,0 +1,6 @@
+field1:
+  field11:
+    - val1
+    - val2
+field2:
+  field21: true
