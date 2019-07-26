@@ -48,7 +48,7 @@ func TestLoadJSONConfigFile(t *testing.T) {
 
 	os.Setenv("TEST_FIELD23", "val23")
 
-	if err = LoadYAMLConfigFile("testdata/config.json", &cfg); err != nil {
+	if err = LoadJSONConfigFile("testdata/config.json", &cfg); err != nil {
 		t.Fatal(err)
 	}
 
