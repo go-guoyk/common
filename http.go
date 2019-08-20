@@ -6,7 +6,18 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
+
+var (
+	commonHTTPClient *http.Client
+)
+
+func init() {
+	commonHTTPClient = &http.Client{
+		Timeout: time.Second * 10,
+	}
+}
 
 func httpJSON(method string, url string, in interface{}, out interface{}) (err error) {
 	// body
@@ -28,7 +39,7 @@ func httpJSON(method string, url string, in interface{}, out interface{}) (err e
 	}
 	// response
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil {
+	if resp, err = commonHTTPClient.Do(req); err != nil {
 		return
 	}
 	defer resp.Body.Close()
