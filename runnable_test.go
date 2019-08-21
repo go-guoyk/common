@@ -35,26 +35,17 @@ func (t *testRunnable) Run(ctx context.Context) error {
 	return nil
 }
 
-func TestRunnableGroup_Run(t *testing.T) {
+func TestRun(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	done := make(chan interface{})
+	done := make(chan error)
 
 	r1 := &testRunnable{shouldFail: true}
 	r2 := &testRunnable{shouldFail: false}
 	r3 := &testRunnable{shouldFail: false}
 
-	rg := NewRunnableGroup()
-	rg.Add(r1)
-	rg.Add(r2)
-	rg.Add(r3)
+	RunAsync(ctx, cancel, done, r1, r2, r3)
 
-	var err error
-
-	go func() {
-		err = rg.Run(ctx, cancel, done)
-	}()
-
-	<-done
+	err := <-done
 
 	assert.Error(t, err, "should failed")
 	assert.True(t, r1.completed, "r1 should complete")
@@ -69,29 +60,22 @@ func TestRunnableGroup_Run(t *testing.T) {
 	assert.True(t, r3.cancelled, "r3 should cancel")
 }
 
-func TestRunnableGroup_Run1(t *testing.T) {
+func TestRun1(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	done := make(chan interface{})
+	done := make(chan error)
 	done2 := make(chan interface{})
 
 	r1 := &testRunnable{shouldFail: true}
 	r2 := &testRunnable{shouldFail: false}
 
-	rg := NewRunnableGroup()
-	rg.Add(r1)
-
-	var err error
-
-	go func() {
-		err = rg.Run(ctx, cancel, done)
-	}()
+	RunAsync(ctx, cancel, done, r1)
 
 	go func() {
 		r2.Run(ctx)
 		close(done2)
 	}()
 
-	<-done
+	err := <-done
 	<-done2
 
 	assert.Error(t, err, "should failed")
