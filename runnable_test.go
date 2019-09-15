@@ -87,3 +87,16 @@ func TestRun1(t *testing.T) {
 	assert.False(t, r2.succeeded, "r2 should not success")
 	assert.True(t, r2.cancelled, "r2 should cancel")
 }
+
+func TestRunWithNoCancel(t *testing.T) {
+	ctx := context.Background()
+
+	r1 := &testRunnable{shouldFail: false}
+	r2 := &testRunnable{shouldFail: false}
+
+	err := Run(ctx, nil, nil, r1, r2)
+
+	assert.NoError(t, err, "should not failed")
+	assert.True(t, r1.completed, "r1 should complete")
+	assert.True(t, r2.completed, "r2 should complete")
+}
